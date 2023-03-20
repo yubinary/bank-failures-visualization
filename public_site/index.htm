@@ -57,6 +57,41 @@
       .force("center", d3.forceCenter(width / 2, height / 2))
       .on("tick", render);
 
+    // External code for wrapping a text in d3
+    // Citation: https://stackoverflow.com/questions/24784302/wrapping-text-in-d3 
+    function wrap(text, width) {
+      text.each(function () {
+        var text = d3.select(this),
+          words = text.text().split(/\s+/).reverse(),
+          word,
+          line = [],
+          lineNumber = 0,
+          lineHeight = 1.1, // ems
+          x = text.attr("x"),
+          y = text.attr("y"),
+          dy = 0, //parseFloat(text.attr("dy")),
+          tspan = text.text(null)
+            .append("tspan")
+            .attr("x", x)
+            .attr("y", y)
+            .attr("dy", dy + "em");
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan")
+              .attr("x", x)
+              .attr("y", y)
+              .attr("dy", ++lineNumber * lineHeight + dy + "em")
+              .text(word);
+          }
+        }
+      });
+    }
+
     function render() {
       let circles = chartArea.selectAll("circle.node")
         .data(data)
@@ -67,6 +102,27 @@
         .attr("fill", "green")
         .attr("r", d => assetScale(d['Asset']))
         .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      let circleText = chartArea.selectAll("text.label")
+        .data(data)
+        .join("text")
+        .attr("class", "label")
+        .style("text-anchor", "middle")
+        .style("text-align", "center")
+        .style("fill", "white")
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .attr("width", d => assetScale(d['Asset']))
+        .style("overflow-y", "auto")
+        .style("font-size", "10px")
+        .text(d => {
+          if (assetScale(d['Asset']) > 13) {
+            return d['Bank'];
+          } else {
+            return "";
+          }
+        })
+        .call(wrap, 80);
 
     }
     render();
