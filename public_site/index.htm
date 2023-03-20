@@ -2,15 +2,77 @@
 
 <head>
   <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
+  <div>
+    <svg id="network" width="900" height="700"></svg>
+  </div>
 
 </body>
 
 <script>
+  const svg = d3.select("svg#network");
+  const height = svg.attr("height");
+  const width = svg.attr("width");
+
+  let chartArea = svg.append("g");
+
+  const requestData = async () => {
+    const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
+
+    data.forEach(d => {
+      // convert a currency string to a double 
+      d["Asset"] = parseFloat(d["Approx. Asset (Millions)"].replace(/[$,]+/g, ""));
+      d["Deposit"] = parseFloat(d["Approx. Deposit (Millions)"].replace(/[$,]+/g, ""));
+
+      // split bank name, city, and state 
+      const arr = d["Bank Name, City, State"].split(', ');
+      d["Bank"] = arr[0];
+      d["City"] = arr[1];
+      d["State"] = arr[2];
+    });
+
+    // sort data by descending Asset
+    function compare(a, b) {
+      if (a.Asset > b.Asset) {
+        return -1;
+      }
+      if (a.Asset < b.Asset) {
+        return 1;
+      }
+      return 0;
+    }
+    data.sort(compare);
+    console.log("data after processing", data);
+
+    let assetExtent = d3.extent(data, d => d['Asset']);
+    let assetScale = d3.scaleSqrt().domain(assetExtent).range([4, 80]);
+
+    var simulation = d3.forceSimulation()
+      .nodes(data)
+      .force("collision", d3.forceCollide().radius(d => assetScale(d['Asset']) + 3).strength(0.3))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .on("tick", render);
+
+    function render() {
+      let circles = chartArea.selectAll("circle.node")
+        .data(data)
+        .join("circle")
+        .attr("class", "node")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("fill", "green")
+        .attr("r", d => assetScale(d['Asset']))
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+    }
+    render();
+
+  }
+  requestData();
 
 </script>
 
