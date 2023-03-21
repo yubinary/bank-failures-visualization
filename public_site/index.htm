@@ -9,6 +9,11 @@
 <body>
   <div>
     <svg id="network" width="900" height="700"></svg>
+    <div class="range">
+      <input type="text" id="minAsset" name="minAsset" placeholder="Min Asset">
+      <input type="text" id="maxAsset" name="maxAsset" placeholder="Max Asset">
+    </div>
+    <button id="button">button</button>
   </div>
 
 </body>
@@ -22,6 +27,7 @@
 
   const requestData = async () => {
     const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
+    const dataFilter0 = await d3.json("datasets/total.json", d3.autoType);
 
     data.forEach(d => {
       // convert a currency string to a double 
@@ -47,16 +53,6 @@
     }
     data.sort(compare);
     console.log("data after processing", data);
-
-    let assetExtent = d3.extent(data, d => d['Asset']);
-    let assetScale = d3.scaleSqrt().domain(assetExtent).range([3, 130]);
-    let colorScale = d3.scaleSequential(d3.interpolateYlGn).domain(assetExtent);
-
-    var simulation = d3.forceSimulation()
-      .nodes(data)
-      .force("collision", d3.forceCollide().radius(d => assetScale(d['Asset']) + 3).strength(0.3))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .on("tick", render);
 
     // External code for wrapping a text in d3
     // Citation: https://stackoverflow.com/questions/24784302/wrapping-text-in-d3 
@@ -93,80 +89,143 @@
       });
     }
 
-    // initial drawing for zoom
-    let circles = chartArea.selectAll("circle.node")
-      .data(data)
-      .join("circle")
-      .attr("class", "node")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("fill", "green")
-      .attr("r", d => assetScale(d['Asset']))
-      .attr("transform", d => `translate(${d.x},${d.y})`);
-    let banks = chartArea.selectAll(".node")
-    var k = 1;
-    //zooming
-    var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", zoomed)
-    svg.call(zoom);
-    function zoomed(event) {
-      chartArea.attr("transform", event.transform);
-      k = event.transform.k
+    function drawNetworkDiagram(data) {
+      let assetExtent = d3.extent(data, d => d['Asset']);
+      let assetScale = d3.scaleSqrt().domain(assetExtent).range([3, 130]);
+      let colorScale = d => d3.interpolateYlGn(d3.scaleSymlog().domain(assetExtent).range([0, 1])(d));
+
+      // initial drawing for zoom
+      // let circles = chartArea.selectAll("circle.node")
+      //   .data(data)
+      //   .join("circle")
+      //   .attr("class", "node")
+      //   .attr("cx", 0)
+      //   .attr("cy", 0)
+      //   .attr("fill", "green")
+      //   .attr("r", d => assetScale(d['Asset']))
+      //   .attr("transform", d => `translate(${d.x},${d.y})`);
+      // let banks = chartArea.selectAll(".node")
+      // var k = 1;
+      // //zooming
+      // var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", zoomed)
+      // svg.call(zoom);
+      // function zoomed(event) {
+      //   chartArea.attr("transform", event.transform);
+      //   k = event.transform.k
+      // }
+      // banks.on("mouseover", function (event, d) {
+      //   d3.select(this)
+      //     .style("fill", "red")
+      // });
+      // banks.on("mouseout", function (event, d) {
+      //   d3.select(this)
+      //     .style("fill", d => colorScale(d['Asset']))
+      // });
+
+      // var simulation = d3.forceSimulation()
+      //   .nodes(data)
+      //   .force("collision", d3.forceCollide().radius(d => assetScale(d['Asset']) + 3).strength(0.5))
+      //   .force("center", d3.forceCenter(width / 2, height / 2))
+      //   .force("charge", d3.forceManyBody().strength(0.5))
+      //   .on("tick", render);
+
+      function render() {
+        let circles = chartArea.selectAll("circle.node")
+          .data(data)
+          .join(
+            enter => enter.append("circle")
+              .attr("class", "node")
+              .attr("r", d => assetScale(d['Asset']))
+              .attr("cx", d => d.x)
+              .attr("cy", d => d.y)
+              .attr("fill", d => colorScale(d['Asset']))
+            // .call(d3.drag().on("start", dragstart)
+            //   .on("drag", dragging)
+            //   .on("end", dragend))
+          )
+          .transition()
+          .duration(1250)
+          .attr('opacity', 1)
+
+        let circleText = chartArea.selectAll("text.label")
+          .data(data)
+          .join("text")
+          .attr("class", "label")
+          .style("text-anchor", "middle")
+          .style("text-align", "center")
+          .style("fill", "white")
+          .attr("x", d => d.x)
+          .attr("y", d => {
+            if (assetScale(d['Asset']) > 30) {
+              return d.y - 5;
+            } else if (assetScale(d['Asset']) > 15) {
+              return d.y + 3;
+            }
+          })
+          .attr("width", d => assetScale(d['Asset']))
+          .style("overflow-y", "auto")
+          .style("font-size", "10px")
+          .text(d => {
+            if (assetScale(d['Asset']) > 30) {
+              return d['Bank'] + "\n" + d['Approx. Asset (Millions)'].split('.')[0];
+            } else if (assetScale(d['Asset']) > 15) {
+              return d['Approx. Asset (Millions)'].split('.')[0];
+            } else {
+              return "";
+            }
+          })
+          .call(wrap, 60);
+      }
+      render();
+
+      // function dragstart(event, d) {
+      //   if (!event.active) {
+      //     simulation.alphaTarget(0.08).restart();
+      //   }
+      //   d.fx = event.x;
+      //   d.fy = event.y;
+      // }
+      // function dragging(event, d) {
+      //   d.fx = event.x;
+      //   d.fy = event.y;
+      // }
+      // function dragend(event, d) {
+      //   if (!event.active) {
+      //     simulation.alpha(0.5)
+      //       .alphaTarget(0.3)
+      //       .restart();
+      //     simulation.force("collision").initialize(data);
+      //   }
+      //   d.fx = null;
+      //   d.fy = null;
+      // }
     }
-    banks.on("mouseover", function (event, d) {
-      d3.select(this)
-        .style("fill", "red")
+
+    drawNetworkDiagram(dataFilter0);
+
+    d3.select("#button").on("click", function (event, d) {
+      console.log(JSON.stringify(dataFilter0));
+      var minAsset = document.getElementById('minAsset').value || null;
+      var maxAsset = document.getElementById('maxAsset').value || null;
+
+      function filterByAsset(obj) {
+        if (minAsset <= obj["Asset"] && obj["Asset"] <= maxAsset) {
+          return true
+        } else {
+          return false
+        }
+      }
+
+      var newData = data.filter(filterByAsset);
+      console.log(newData)
+      drawNetworkDiagram(newData);
+
     });
-    banks.on("mouseout", function (event, d) {
-      d3.select(this)
-        .style("fill", d => colorScale(d['Asset']))
-    });
-
-    function render() {
-      let circles = chartArea.selectAll("circle.node")
-        .data(data)
-        .join("circle")
-        .attr("class", "node")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("fill", d => colorScale(d['Asset']))
-        .attr("r", d => assetScale(d['Asset']))
-        .attr("transform", d => `translate(${d.x},${d.y})`);
-
-      let circleText = chartArea.selectAll("text.label")
-        .data(data)
-        .join("text")
-        .attr("class", "label")
-        .style("text-anchor", "middle")
-        .style("text-align", "center")
-        .style("fill", "white")
-        .attr("x", d => d.x)
-        .attr("y", d => {
-          if (assetScale(d['Asset']) > 30) {
-            return d.y - 5;
-          } else if (assetScale(d['Asset']) > 15) {
-            return d.y + 3;
-          }
-        })
-        .attr("width", d => assetScale(d['Asset']))
-        .style("overflow-y", "auto")
-        .style("font-size", "10px")
-        .text(d => {
-          if (assetScale(d['Asset']) > 30) {
-            return d['Bank'] + "\n" + d['Approx. Asset (Millions)'].split('.')[0];
-          } else if (assetScale(d['Asset']) > 15) {
-            return d['Approx. Asset (Millions)'].split('.')[0];
-          } else {
-            return "";
-          }
-        })
-        .call(wrap, 60);
-
-    }
-    render();
-
 
   }
   requestData();
+
+
 
 </script>
 
