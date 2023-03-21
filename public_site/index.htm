@@ -91,6 +91,33 @@
         }
       });
     }
+    // initial drawing for zoom
+    let circles = chartArea.selectAll("circle.node")
+      .data(data)
+      .join("circle")
+      .attr("class", "node")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("fill", "green")
+      .attr("r", d => assetScale(d['Asset']))
+      .attr("transform", d => `translate(${d.x},${d.y})`);
+    let banks = chartArea.selectAll(".node")
+    var k = 1;
+    //zooming
+    var zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", zoomed)
+    svg.call(zoom);
+    function zoomed(event) {
+      chartArea.attr("transform", event.transform);
+      k = event.transform.k
+    }
+    banks.on("mouseover", function (event, d) {
+      d3.select(this)
+        .style("fill", "red")
+    });
+    banks.on("mouseout", function (event, d) {
+      d3.select(this)
+        .style("fill", "green")
+    });
 
     function render() {
       let circles = chartArea.selectAll("circle.node")
@@ -110,6 +137,7 @@
         .style("text-anchor", "middle")
         .style("text-align", "center")
         .style("fill", "white")
+        .style("pointer-events", "none")
         .attr("x", d => d.x)
         .attr("y", d => d.y)
         .attr("width", d => assetScale(d['Asset']))
