@@ -49,7 +49,8 @@
     console.log("data after processing", data);
 
     let assetExtent = d3.extent(data, d => d['Asset']);
-    let assetScale = d3.scaleSqrt().domain(assetExtent).range([4, 80]);
+    let assetScale = d3.scaleSqrt().domain(assetExtent).range([3, 130]);
+    let colorScale = d3.scaleSequential(d3.interpolateYlGn).domain(assetExtent);
 
     var simulation = d3.forceSimulation()
       .nodes(data)
@@ -91,6 +92,7 @@
         }
       });
     }
+
     // initial drawing for zoom
     let circles = chartArea.selectAll("circle.node")
       .data(data)
@@ -116,7 +118,7 @@
     });
     banks.on("mouseout", function (event, d) {
       d3.select(this)
-        .style("fill", "green")
+        .style("fill", d => colorScale(d['Asset']))
     });
 
     function render() {
@@ -126,7 +128,7 @@
         .attr("class", "node")
         .attr("cx", 0)
         .attr("cy", 0)
-        .attr("fill", "green")
+        .attr("fill", d => colorScale(d['Asset']))
         .attr("r", d => assetScale(d['Asset']))
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
@@ -137,23 +139,31 @@
         .style("text-anchor", "middle")
         .style("text-align", "center")
         .style("fill", "white")
-        .style("pointer-events", "none")
         .attr("x", d => d.x)
-        .attr("y", d => d.y)
+        .attr("y", d => {
+          if (assetScale(d['Asset']) > 30) {
+            return d.y - 5;
+          } else if (assetScale(d['Asset']) > 15) {
+            return d.y + 3;
+          }
+        })
         .attr("width", d => assetScale(d['Asset']))
         .style("overflow-y", "auto")
         .style("font-size", "10px")
         .text(d => {
-          if (assetScale(d['Asset']) > 13) {
-            return d['Bank'];
+          if (assetScale(d['Asset']) > 30) {
+            return d['Bank'] + "\n" + d['Approx. Asset (Millions)'].split('.')[0];
+          } else if (assetScale(d['Asset']) > 15) {
+            return d['Approx. Asset (Millions)'].split('.')[0];
           } else {
             return "";
           }
         })
-        .call(wrap, 80);
+        .call(wrap, 60);
 
     }
     render();
+
 
   }
   requestData();
