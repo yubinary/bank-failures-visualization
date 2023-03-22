@@ -9,6 +9,7 @@
 
 <body>
   <div>
+    <svg id="priceSvg" width=800 height=350></svg>
     <svg id="network" width="900" height="800"></svg>
     <svg id="legend" width="500" height="50"></svg>
     <div class="range">
@@ -100,7 +101,7 @@
       // Citation: https://github.com/jeffrz/info3300-fa2022/blob/main/notes/22.10.03.notes.htm
       drawLegend("svg#legend", colorScale);
 
-      // initial drawing for zoom
+      // Initial drawing for zoom
       // let circles = chartArea.selectAll("circle.node")
       //   .data(data)
       //   .join(
@@ -126,6 +127,7 @@
       //   k = event.transform.k
       // }
 
+      // Simulation for network diagram
       // var simulation = d3.forceSimulation()
       //   .nodes(data)
       //   .force("collision", d3.forceCollide().radius(d => assetScale(d['Asset']) + 3).strength(0.5))
@@ -148,7 +150,6 @@
                 let node = d3.select(this)
                 let selectedData = node.datum();
                 var selectedCircle = node.node().getBBox();
-                console.log(selectedCircle)
                 if (clicked == this) {
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']));
@@ -192,6 +193,7 @@
                     .call(wrap, 80);
                 }
               })
+            // Enable drag and drop
             // .call(d3.drag().on("start", dragstart)
             //   .on("drag", dragging)
             //   .on("end", dragend))
@@ -257,24 +259,162 @@
 
     drawNetworkDiagram(dataFilter0);
 
-    d3.select("#button").on("click", function (event, d) {
-      console.log(JSON.stringify(dataFilter0));
-      var minAsset = document.getElementById('minAsset').value || null;
-      var maxAsset = document.getElementById('maxAsset').value || null;
+    // ** price bar chart ** 
 
-      function filterByAsset(obj) {
-        if (minAsset <= obj["Asset"] && obj["Asset"] <= maxAsset) {
-          return true
-        } else {
-          return false
-        }
-      }
+    // 1. set up data 
+    asset = [];
+    assetDict = {};
 
-      var newData = data.filter(filterByAsset);
-      console.log(newData)
-      drawNetworkDiagram(newData);
-
+    data.forEach(d => {
+      asset.push(d["Asset"])
     });
+
+    console.log(asset); //extent 4.9 307000
+
+    // 2. calculate the batch 
+    const rangeStart = 4.9;
+    const rangeEnd = 1000;
+    const batchSize = (rangeEnd - rangeStart) / 3;
+
+    for (let i = 0; i < 3; i++) {
+      const batchStart = rangeStart + (i * batchSize);
+      const batchEnd = batchStart + batchSize;
+      console.log(`Batch ${i + 1}: ${batchStart.toFixed(1)} - ${batchEnd.toFixed(1)}`);
+    }
+
+    // 3. make the dictionary of counts for the price: tick: 6
+    assetDict["4.9M"] = 0, assetDict["336M"] = 0, assetDict["668M"] = 0;
+    assetDict["1B"] = 0;
+    // assetDict["10000.0"] = 0;
+    assetDict["10B"] = 0;
+
+    for (let i = 0; i < asset.length; i++) {
+      if (asset[i] > 100000) {
+        assetDict["10B"] += 1
+      }
+      // else if (asset[i] > 10000) {
+      //   assetDict["10000.0"] += 1
+      // } 
+      else if (asset[i] > 1000) {
+        assetDict["1B"] += 1
+      } else if (asset[i] > 668.3) {
+        assetDict["668M"] += 1
+      } else if (asset[i] > 336.6) {
+        assetDict["336M"] += 1
+      } else if (asset[i] > 4.9) {
+        assetDict["4.9M"] += 1
+      }
+    }
+
+    console.log(assetDict);
+
+    // 4. set up the svg 
+    var svg2 = d3.select("#priceSvg"),
+      margin2 = { top: 30, right: 0, bottom: 30, left: 80 },
+      width2 = +svg.attr("width") - margin2.left - margin2.right,
+      height2 = +svg.attr("height") - margin2.top - margin2.bottom
+
+    g = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+    //  Define the scales for the x and y axes
+    let xScale = d3.scaleBand()
+      .domain(Object.keys(assetDict))
+      .range([margin2.left, 400]) //0, width
+      .padding(0.2);
+
+    let yScale = d3.scaleLinear()
+      .domain([0, d3.max(Object.values(assetDict))])
+      .range([300 - margin2.top - margin2.bottom, 0]); //height, 0
+
+    // Create the bars
+    svg2.selectAll('rect')
+      .data(Object.entries(assetDict))
+      .enter()
+      .append('rect')
+      .attr('x', (d) => xScale(d[0]))
+      .attr('y', (d) => margin2.top + yScale(d[1]))
+      .attr('width', xScale.bandwidth())
+      .attr('height', (d) => 300 - margin2.top - margin2.bottom - yScale(d[1]))
+      .attr('fill', 'steelblue');
+
+    // x and y axis labels and titles
+    svg2.append('g')
+      .attr('transform', 'translate(0, 270)')
+      .call(d3.axisBottom(xScale)
+        .tickFormat(function (d) {
+          return "$" + d;
+        }));
+
+    svg2.append('g')
+      .attr("transform", `translate(${margin2.left}, ${margin2.top})`)
+      .call(d3.axisLeft(yScale));
+
+    //axis label
+    svg2.append("text")
+      .attr("x", (width2 / 2))
+      .attr("y", 15)
+      .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
+      .style("fill", "black")
+      .text("Number of Banks by Asset (Millions)");
+
+    svg2.append('text')
+      .attr("transform", "translate(" + (width / 2 - margin2.left) + " ," + (320) + ")") //320=y 
+      // .attr('x', width2 / 2 + 10)
+      // .attr('y', height2 - 10)
+      .attr('text-anchor', 'middle')
+      .style("font-size", "14px")
+      .text('Assets');
+
+    svg2.append("text")
+      .attr("text-anchor", "middle")
+      .attr("x", -height / 2 + margin2.top + margin2.bottom + 100)
+      .attr("y", 30) // distance to the graph
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "14px")
+      .text("Number of Banks");
+
+
+    let labels = svg2.selectAll('.label')
+      .data(Object.entries(assetDict))
+      .enter()
+      .append('text')
+      .attr('class', 'label')
+      .attr('x', (d) => xScale(d[0]) + xScale.bandwidth() / 2)
+      .attr('y', (d) => margin2.top + yScale(d[1]) - 5) // Adjust y position
+      .text((d) => d[1])
+      .style("font-size", "12px")
+      .style('text-anchor', 'middle')
+      .style('visibility', 'visible');
+
+
+
+    svg2.selectAll('rect')
+
+      .on('mouseover', function (d) {
+
+        // Show label
+        d3.select(this)
+          .style('opacity', 0.7);
+
+        // labels
+        // // labels.filter(  ((l) => l[0]) ===  ( (d) => d[0] )
+        //   .style('visibility', 'visible');
+      })
+
+      .on('mouseout', function () {
+        // Hide label
+        d3.select(this)
+          .style('opacity', 1);
+
+        // labels.style('visibility', 'hidden');
+      });
+
+    // Button to export JSON file
+    // d3.select("#button").on("click", function (event, d) {
+    //   console.log(JSON.stringify(dataFilter0));
+    // });
 
   }
   requestData();
