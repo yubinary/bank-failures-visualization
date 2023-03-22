@@ -146,10 +146,17 @@
               .attr("fill", d => colorScale(d['Asset']))
               .on("click", function (d) {
                 let node = d3.select(this)
+                let selectedData = node.datum();
+                var selectedCircle = node.node().getBBox();
+                console.log(selectedCircle)
                 if (clicked == this) {
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']));
+                  chartArea.selectAll("text").raise();
+                  clicked = null;
+                  d3.select(".info").remove();
                 } else {
+                  chartArea.selectAll("text").raise();
                   pastNode = d3.select(clicked)
                   pastNode.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']));
@@ -166,6 +173,24 @@
                     });
                   clicked = this;
                   node.raise();
+                  d3.select(".info").remove();
+                  chartArea.append("text")
+                    .data(data)
+                    .join("text")
+                    .attr("class", "info")
+                    .attr('x', selectedCircle.x + selectedCircle.width / 2)
+                    .attr('y', selectedCircle.y + selectedCircle.width / 4)
+                    .style("font-size", "12px")
+                    .style("text-anchor", "middle")
+                    .style("text-align", "center")
+                    .style("fill", "black")
+                    .style('pointer-events', "none")
+                    .text(d => {
+                      return selectedData['Bank'] + "\n" + "Closing: " + selectedData["Closing Date"]
+                        + "\n" + "Assets: " + selectedData['Approx. Asset (Millions)'].split('.')[0] + "\n" + selectedData["City"] + ", " +
+                        selectedData["State"];
+                    })
+                    .call(wrap, 80);
                 }
               })
             // .call(d3.drag().on("start", dragstart)
