@@ -136,7 +136,7 @@
       //   .on("tick", render);
 
       function render() {
-        var clicked;
+        var clicked = null;
         let circles = chartArea.selectAll("circle.node")
           .data(data)
           .join(
@@ -155,15 +155,78 @@
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']))
                     .style("stroke", "none");
-                  chartArea.selectAll("text").raise();
+                  let circleText = chartArea.append("text")
+                    .attr("class", "extra")
+                    .style("text-anchor", "middle")
+                    .style("text-align", "center")
+                    .style("fill", "white")
+                    .style("pointer-events", "none")
+                    .attr("x", d => selectedCircle.x + selectedCircle.width / 2)
+                    .attr("y", d => {
+                      if (assetScale(selectedData['Asset']) > 30) {
+                        return selectedCircle.y + selectedCircle.width / 2 - 5;
+                      } else if (assetScale(selectedData['Asset']) > 15) {
+                        return selectedCircle.y + selectedCircle.width / 2 + 3;
+                      }
+                    })
+                    .attr("width", d => assetScale(selectedData['Asset']))
+                    .style("overflow-y", "auto")
+                    .style("font-size", "10px")
+                    .text(d => {
+                      if (assetScale(selectedData['Asset']) > 30) {
+                        return selectedData['Bank'] + "\n" + selectedData['Approx. Asset (Millions)'].split('.')[0];
+                      } else if (assetScale(selectedData['Asset']) > 15) {
+                        return selectedData['Approx. Asset (Millions)'].split('.')[0];
+                      } else {
+                        return "";
+                      }
+                    })
+                    .call(wrap, 60);
                   clicked = null;
                   d3.selectAll(".info").remove();
                 } else {
-                  chartArea.selectAll("text").raise();
-                  pastNode = d3.select(clicked)
+                  let pastNode;
+                  if (clicked == null) {
+                    pastNode = d3.select(this)
+                  } else {
+                    pastNode = d3.select(clicked)
+                  }
                   pastNode.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']))
                     .style("stroke", "none");
+                  let pastData = pastNode.datum()
+                  let pastCircle = pastNode.node().getBBox()
+                  pastNode.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
+                    .attr("r", d => assetScale(d['Asset']))
+                    .style("stroke", "none");
+                  let circleText = chartArea.append("text")
+                    .attr("class", "extra")
+                    .style("text-anchor", "middle")
+                    .style("text-align", "center")
+                    .style("fill", "white")
+                    .style("pointer-events", "none")
+                    .attr("x", d => pastCircle.x + pastCircle.width / 2)
+                    .attr("y", d => {
+                      if (assetScale(pastData['Asset']) > 30) {
+                        return pastCircle.y + pastCircle.width / 2 - 5;
+                      } else if (assetScale(pastData['Asset']) > 15) {
+                        return pastCircle.y + pastCircle.width / 2 + 3;
+                      }
+                    })
+                    .attr("width", d => assetScale(pastData['Asset']))
+                    .style("overflow-y", "auto")
+                    .style("font-size", "10px")
+                    .text(d => {
+                      if (assetScale(pastData['Asset']) > 30) {
+                        return pastData['Bank'] + "\n" + pastData['Approx. Asset (Millions)'].split('.')[0];
+                      } else if (assetScale(pastData['Asset']) > 15) {
+                        return pastData['Approx. Asset (Millions)'].split('.')[0];
+                      } else {
+                        return "";
+                      }
+                    })
+                    .call(wrap, 60);
+
                   node.transition().duration(650).style("stroke", "pink")
                     .style("stroke-width", "5px")
                     .attr("r", function (d) {
