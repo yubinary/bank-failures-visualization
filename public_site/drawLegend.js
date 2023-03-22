@@ -16,7 +16,7 @@ function drawLegend(legendSelector, legendColorScale) {
   };
   // Number of integer 'pixel steps' to draw when showing continuous scales
   //    Warning, not using a canvas element so lots of rect tags will be created for low stepSize, causing issues with performance -- keep this large
-  const stepSize = 40;
+  const stepSize = 60;
   // Extend the minmax by 0% in either direction to expose more features by default
   const minMaxExtendPercent = 0;
 
@@ -31,15 +31,18 @@ function drawLegend(legendSelector, legendColorScale) {
 
   // In this case the "data" are pixels, and we get numbers to use in colorScale
   // Use this to make axis labels
-  let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
-  legendMinMax[1] + minMaxExtension])
+  let barScale = d3.scaleLog()
+    .domain([legendMinMax[0] - minMaxExtension, legendMinMax[1] + minMaxExtension])
     .range([0, legendBarWidth]);
-  let barAxis = d3.axisBottom(barScale).tickFormat(d3.format(".2s")); // EDIT: used d3.format to round numbers
+  let barAxis = d3.axisBottom(barScale)
+    .ticks(8)
+    .tickValues([0, 20, 80, 310, 1250, 4900, 19500, 77000, 307000])
+    .tickFormat(d3.format(".2s")); // EDIT: used d3.format to round numbers
 
   // Place for bar slices to live
   let bar = legend.append("g")
     .attr("class", "legend colorbar")
-    .attr("transform", `translate(${offsets.width},${offsets.top})`)
+    .attr("transform", `translate(${offsets.width - 3},${offsets.top})`)
 
   // ****** SWITCHES FOR DIFFERENT SCALE TYPES ******
 
@@ -143,6 +146,6 @@ function drawLegend(legendSelector, legendColorScale) {
   // Finally, draw legend labels
   legend.append("g")
     .attr("class", "legend axis")
-    .attr("transform", `translate(${offsets.width},${offsets.top + barHeight + 5})`)
+    .attr("transform", `translate(${offsets.width - 3},${offsets.top + barHeight + 5})`)
     .call(barAxis);
 }
