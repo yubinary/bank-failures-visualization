@@ -9,7 +9,7 @@
 
 <body>
   <div>
-    <svg id="priceSvg" width=800 height=350></svg>
+    <svg id="priceSvg" width=400 height=350></svg>
     <svg id="network" width="900" height="800"></svg>
     <svg id="legend" width="500" height="50"></svg>
     <div class="range">
@@ -351,7 +351,7 @@
 
     //axis label
     svg2.append("text")
-      .attr("x", (width2 / 2))
+      .attr("x", (200 - margin))
       .attr("y", 15)
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
