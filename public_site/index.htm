@@ -196,9 +196,18 @@
                     .style("stroke", "none");
                   let pastData = pastNode.datum()
                   let pastCircle = pastNode.node().getBBox()
-                  pastNode.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
-                    .attr("r", d => assetScale(d['Asset']))
-                    .style("stroke", "none");
+                  node.transition().duration(650).style("stroke", "white")
+                    .style("stroke-width", "5px")
+                    .attr("r", function (d) {
+                      x = assetScale(d["Asset"]);
+                      if (x > 50) {
+                        return x + 30;
+                      } else if (x < 51 && x > 20) {
+                        return 140;
+                      } else {
+                        return 145;
+                      }
+                    });
                   let circleText = chartArea.append("text")
                     .attr("class", "extra")
                     .style("text-anchor", "middle")
@@ -226,19 +235,6 @@
                       }
                     })
                     .call(wrap, 60);
-
-                  node.transition().duration(650).style("stroke", "pink")
-                    .style("stroke-width", "5px")
-                    .attr("r", function (d) {
-                      x = assetScale(d["Asset"]);
-                      if (x > 50) {
-                        return x + 30;
-                      } else if (x < 51 && x > 20) {
-                        return 90;
-                      } else {
-                        return 100;
-                      }
-                    });
                   clicked = this;
                   node.raise();
                   d3.selectAll(".info").remove();
@@ -246,12 +242,14 @@
                     .data(data)
                     .attr("class", "info")
                     .attr('x', selectedCircle.x + selectedCircle.width / 2)
-                    .attr('y', selectedCircle.y + (selectedCircle.height - 20) / 2)
-                    .style("font-size", "10px")
+                    .attr('y', selectedCircle.y + (selectedCircle.height - 30) / 2)
+                    .transition().duration(650)
+                    .style("font-size", "15px")
                     .style("text-anchor", "middle")
                     .style("text-align", "center")
-                    .style("fill", "black")
+                    .style("fill", "white")
                     .style('pointer-events', "none")
+                    .style("font-weight", "bold")
                     .text(d => {
                       return selectedData['Bank'];
                     })
@@ -261,10 +259,11 @@
                     .attr("class", "info")
                     .attr('x', selectedCircle.x + selectedCircle.width / 2)
                     .attr('y', selectedCircle.y + (selectedCircle.height) / 2)
-                    .style("font-size", "10px")
+                    .transition().duration(650)
+                    .style("font-size", "13px")
                     .style("text-anchor", "middle")
                     .style("text-align", "center")
-                    .style("fill", "black")
+                    .style("fill", "white")
                     .style('pointer-events', "none")
                     .text(d => {
                       return "Closing Date: " + selectedData["Closing Date"];
@@ -274,11 +273,12 @@
                     .data(data)
                     .attr("class", "info")
                     .attr('x', selectedCircle.x + selectedCircle.width / 2)
-                    .attr('y', selectedCircle.y + (selectedCircle.height + 20) / 2)
-                    .style("font-size", "10px")
+                    .attr('y', selectedCircle.y + (selectedCircle.height + 30) / 2)
+                    .transition().duration(650)
+                    .style("font-size", "13px")
                     .style("text-anchor", "middle")
                     .style("text-align", "center")
-                    .style("fill", "black")
+                    .style("fill", "white")
                     .style('pointer-events', "none")
                     .text(d => {
                       return "Assets: " + selectedData['Approx. Asset (Millions)'].split('.')[0];
@@ -288,11 +288,12 @@
                     .data(data)
                     .attr("class", "info")
                     .attr('x', selectedCircle.x + selectedCircle.width / 2)
-                    .attr('y', selectedCircle.y + (selectedCircle.height + 40) / 2)
-                    .style("font-size", "10px")
+                    .attr('y', selectedCircle.y + (selectedCircle.height + 60) / 2)
+                    .transition().duration(650)
+                    .style("font-size", "13px")
                     .style("text-anchor", "middle")
                     .style("text-align", "center")
-                    .style("fill", "black")
+                    .style("fill", "white")
                     .style('pointer-events', "none")
                     .text(d => {
                       return selectedData["City"] + ", " + selectedData["State"];
