@@ -13,6 +13,7 @@
       <svg id="network" width="900" height="800"></svg>
     </div>
     <div class="right">
+      <!-- <p>&#11015; Click the bar to filter the network diagram</p> -->
       <svg id="priceSvg" width=400 height=350></svg>
       <svg id="legend" width="500" height="50"></svg>
     </div>
@@ -375,8 +376,6 @@
       asset.push(d["Asset"])
     });
 
-    console.log(asset); //extent 4.9 307000
-
     // 2. calculate the batch 
     // const rangeStart = 4.9;
     // const rangeEnd = 1000;
@@ -453,19 +452,6 @@
       }
     }
 
-    console.log("price range")
-    console.log('1: larger than 4.9, less than or equal to 20 ');
-    console.log('2: larger than 20, less than or equal to 80 ');
-    console.log('3: larger than 80, less than or equal to 310 ');
-    console.log('4: larger than 310, less than or equal to 1.3k ');
-    console.log('5: larger than 1.3k, less than or equal to 4.9k ');
-    console.log('6: larger than 4.9k, less than or equal to 20k ');
-    console.log('7: larger than 20k, less than or equal to 77k ');
-    console.log('8: larger than 77k');
-
-
-
-
     // 4. set up the svg 
     var svg2 = d3.select("#priceSvg"),
       margin2 = { top: 30, right: 0, bottom: 30, left: 50 },
@@ -496,15 +482,18 @@
       .attr('x', (d) => xScale(d[0]))
       .attr('y', (d) => margin2.top + yScale(d[1]))
       .attr('width', xScale.bandwidth())
-      .attr('height', (d) => 305 - margin2.top - margin2.bottom - yScale(d[1]))
-      .attr('fill', (d) => colorScale(d[0]));
+      .attr('height', 0)
+      .attr('fill', (d) => colorScale(d[0]))
+      .transition()
+      .duration(1250)
+      .attr('height', (d) => 305 - margin2.top - margin2.bottom - yScale(d[1]));
 
     // x and y axis labels and titles
     svg2.append('g')
       .attr('transform', 'translate(0, 275)')
       .call(d3.axisBottom(xScale)
         .tickFormat(function (d) {
-          return "$" + d;
+          return d;
         }));
 
     svg2.append('g')
@@ -552,27 +541,20 @@
       .style('visibility', 'visible');
 
 
+    // svg2.selectAll('rect')
+    //   .on('mouseover', function (d) {
+    //     // Show label
+    //     d3.select(this)
+    //       .style('opacity', 0.7);
+    //     console.log(d, this)
+    //   })
+    //   .on('mouseout', function () {
+    //     // Hide label
+    //     d3.select(this)
+    //       .style('opacity', 1);
 
-    svg2.selectAll('rect')
-
-      .on('mouseover', function (d) {
-
-        // Show label
-        d3.select(this)
-          .style('opacity', 0.7);
-
-        // labels
-        // // labels.filter(  ((l) => l[0]) ===  ( (d) => d[0] )
-        //   .style('visibility', 'visible');
-      })
-
-      .on('mouseout', function () {
-        // Hide label
-        d3.select(this)
-          .style('opacity', 1);
-
-        // labels.style('visibility', 'hidden');
-      });
+    //     // labels.style('visibility', 'hidden');
+    //   });
 
     // Button to export JSON file
     // d3.select("#button").on("click", function (event, d) {
