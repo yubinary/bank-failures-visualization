@@ -8,12 +8,20 @@
 </head>
 
 <body>
+  <div class="title">
+    <h3>Not just SVB. There have been 563 bank failures since 2000</h3>
+    <p>One way to measure the magnitude of a bank's failure is by the amount of assets the bank held. By that measure,
+      SVB's collapse is the second largest American bank failure of all time, and the largest since 2008. The vast
+      majority of failures since 2000 have been smaller regional banks.</p>
+    <p>The dataset is from <a href="https://www.fdic.gov/bank/historical/bank/">FDIC</a> and the original visualization
+      can be viewed <a href="https://yarn.pranshum.com/banks">here</a>.</p>
+  </div>
   <div class="diagrams">
     <div class="left">
-      <svg id="network" width="900" height="800"></svg>
+      <p>&#11015; Click the circle to learn more about the bank</p>
+      <svg id="network" width="800" height="1000"></svg>
     </div>
     <div class="right">
-      <!-- <p>&#11015; Click the bar to filter the network diagram</p> -->
       <svg id="priceSvg" width=400 height=350></svg>
       <svg id="legend" width="500" height="50"></svg>
     </div>
@@ -25,7 +33,7 @@
   const height = svg.attr("height");
   const width = svg.attr("width");
 
-  let chartArea = svg.append("g");
+  let chartArea = svg.append("g").attr('transform', 'translate(-60, 100)');
 
   const requestData = async () => {
     const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
@@ -204,7 +212,7 @@
                       } else if (x < 51 && x > 20) {
                         return 140;
                       } else {
-                        return 145;
+                        return 120;
                       }
                     });
                   let circleText = chartArea.append("text")
