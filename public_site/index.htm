@@ -8,20 +8,15 @@
 </head>
 
 <body>
-  <div>
-    <svg id="network" width="900" height="800"></svg>
-    <svg id="legend" width="500" height="50"></svg>
-    <div class="range">
-      <input type="text" id="minAsset" name="minAsset" placeholder="Min Asset">
-      <input type="text" id="maxAsset" name="maxAsset" placeholder="Max Asset">
+  <div class="diagrams">
+    <div class="left">
+      <svg id="network" width="900" height="800"></svg>
     </div>
-    <button id="button">button</button>
+    <div class="right">
+      <svg id="priceSvg" width=400 height=350></svg>
+      <svg id="legend" width="500" height="50"></svg>
+    </div>
   </div>
-  <div>
-    <svg id="priceSvg" width=400 height=350></svg>
-
-  </div>
-
 </body>
 
 <script>
@@ -442,7 +437,7 @@
       }
       else if (asset[i] > 20000) {
         assetDict["77K"] += 1
-      } 
+      }
       else if (asset[i] > 4900) {
         assetDict["20K"] += 1
       } else if (asset[i] > 1300) {
@@ -453,10 +448,10 @@
         assetDict["310"] += 1
       } else if (asset[i] > 20) {
         assetDict["80"] += 1
-      }else if (asset[i] >= 4.9) {
+      } else if (asset[i] >= 4.9) {
         assetDict["20"] += 1
+      }
     }
-  }
 
     console.log("price range")
     console.log('1: larger than 4.9, less than or equal to 20 ');
@@ -470,10 +465,10 @@
 
 
 
-   
+
     // 4. set up the svg 
     var svg2 = d3.select("#priceSvg"),
-      margin2 = { top: 30, right: 0, bottom: 30, left: 80 },
+      margin2 = { top: 30, right: 0, bottom: 30, left: 50 },
       width2 = +svg.attr("width") - margin2.left - margin2.right,
       height2 = +svg.attr("height") - margin2.top - margin2.bottom
 
@@ -490,7 +485,7 @@
       .range([300 - margin2.top - margin2.bottom, 0]); //height, 0
 
     // color scale for bars 
-    const colors = ['#FBFCD4', '#EAF5B6', '#CAE4A1', '#A0CE8B', '#74B573', '#509457', '#367343', '#235533' ];
+    const colors = ['#FBFCD4', '#EAF5B6', '#CAE4A1', '#A0CE8B', '#74B573', '#509457', '#367343', '#235533'];
     const colorScale = d3.scaleOrdinal().domain(Object.keys(assetDict)).range(colors);
 
     // Create the bars
@@ -527,7 +522,7 @@
     //   .text("Number of Banks by Asset (Millions)");
 
     svg2.append('text')
-      .attr("transform", "translate(" + (240 ) + " ," + (320) + ")") //320=y 
+      .attr("transform", "translate(" + (200) + " ," + (320) + ")") //320=y 
       // .attr('x', width2 / 2 + 10)
       // .attr('y', height2 - 10)
       .attr('text-anchor', 'middle')
@@ -538,7 +533,7 @@
       .attr("text-anchor", "middle")
       .attr("x", -160)
       // .attr("x", -height / 2 + margin2.top + margin2.bottom + 100)
-      .attr("y", 30) // distance to the graph
+      .attr("y", 10) // distance to the graph
       .attr("transform", "rotate(-90)")
       .style("font-size", "14px")
       .text("Number of Banks");
