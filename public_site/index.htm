@@ -425,11 +425,11 @@
     const rangeEnd = 1000;
     const batchSize = (rangeEnd - rangeStart) / 3;
 
-    for (let i = 0; i < 3; i++) {
-      const batchStart = rangeStart + (i * batchSize);
-      const batchEnd = batchStart + batchSize;
-      console.log(`Batch ${i + 1}: ${batchStart.toFixed(1)} - ${batchEnd.toFixed(1)}`);
-    }
+    // for (let i = 0; i < 3; i++) {
+    //   const batchStart = rangeStart + (i * batchSize);
+    //   const batchEnd = batchStart + batchSize;
+    //   console.log(`Batch ${i + 1}: ${batchStart.toFixed(1)} - ${batchEnd.toFixed(1)}`);
+    // }
 
     // 3. make the dictionary of counts for the price: tick: 6
     assetDict["20"] = 0, assetDict["80"] = 0, assetDict["310"] = 0;
@@ -437,15 +437,15 @@
     assetDict["77K"] = 0, assetDict["310K"] = 0
 
     for (let i = 0; i < asset.length; i++) {
-      if (asset[i] > 77000) {
+      if (asset[i] >= 77000) {
         assetDict["310K"] += 1
       }
       else if (asset[i] > 20000) {
         assetDict["77K"] += 1
       } 
-      else if (asset[i] > 49000) {
+      else if (asset[i] > 4900) {
         assetDict["20K"] += 1
-      } else if (asset[i] > 13000) {
+      } else if (asset[i] > 1300) {
         assetDict["4.9K"] += 1
       } else if (asset[i] > 310) {
         assetDict["1.3K"] += 1
@@ -453,13 +453,24 @@
         assetDict["310"] += 1
       } else if (asset[i] > 20) {
         assetDict["80"] += 1
-      }else if (asset[i] > 4.9) {
+      }else if (asset[i] >= 4.9) {
         assetDict["20"] += 1
     }
   }
 
-    console.log(assetDict);
+    console.log("price range")
+    console.log('1: larger than 4.9, less than or equal to 20 ');
+    console.log('2: larger than 20, less than or equal to 80 ');
+    console.log('3: larger than 80, less than or equal to 310 ');
+    console.log('4: larger than 310, less than or equal to 1.3k ');
+    console.log('5: larger than 1.3k, less than or equal to 4.9k ');
+    console.log('6: larger than 4.9k, less than or equal to 20k ');
+    console.log('7: larger than 20k, less than or equal to 77k ');
+    console.log('8: larger than 77k');
 
+
+
+   
     // 4. set up the svg 
     var svg2 = d3.select("#priceSvg"),
       margin2 = { top: 30, right: 0, bottom: 30, left: 80 },
@@ -516,7 +527,7 @@
     //   .text("Number of Banks by Asset (Millions)");
 
     svg2.append('text')
-      .attr("transform", "translate(" + (width / 2 - margin2.left) + " ," + (320) + ")") //320=y 
+      .attr("transform", "translate(" + (240 ) + " ," + (320) + ")") //320=y 
       // .attr('x', width2 / 2 + 10)
       // .attr('y', height2 - 10)
       .attr('text-anchor', 'middle')
@@ -525,7 +536,8 @@
 
     svg2.append("text")
       .attr("text-anchor", "middle")
-      .attr("x", -height / 2 + margin2.top + margin2.bottom + 100)
+      .attr("x", -160)
+      // .attr("x", -height / 2 + margin2.top + margin2.bottom + 100)
       .attr("y", 30) // distance to the graph
       .attr("transform", "rotate(-90)")
       .style("font-size", "14px")
