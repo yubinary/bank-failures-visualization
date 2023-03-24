@@ -9,7 +9,6 @@
 
 <body>
   <div>
-    <svg id="priceSvg" width=400 height=350></svg>
     <svg id="network" width="900" height="800"></svg>
     <svg id="legend" width="500" height="50"></svg>
     <div class="range">
@@ -17,6 +16,10 @@
       <input type="text" id="maxAsset" name="maxAsset" placeholder="Max Asset">
     </div>
     <button id="button">button</button>
+  </div>
+  <div>
+    <svg id="priceSvg" width=400 height=350></svg>
+
   </div>
 
 </body>
@@ -380,6 +383,44 @@
     console.log(asset); //extent 4.9 307000
 
     // 2. calculate the batch 
+    // const rangeStart = 4.9;
+    // const rangeEnd = 1000;
+    // const batchSize = (rangeEnd - rangeStart) / 3;
+
+    // for (let i = 0; i < 3; i++) {
+    //   const batchStart = rangeStart + (i * batchSize);
+    //   const batchEnd = batchStart + batchSize;
+    //   console.log(`Batch ${i + 1}: ${batchStart.toFixed(1)} - ${batchEnd.toFixed(1)}`);
+    // }
+
+    // // 3. make the dictionary of counts for the price: tick: 6
+    // assetDict["4.9M"] = 0, assetDict["336M"] = 0, assetDict["668M"] = 0;
+    // assetDict["1B"] = 0;
+    // assetDict["5B"] = 0;
+    // // assetDict["10000.0"] = 0;
+    // assetDict["10B"] = 0;
+
+    // for (let i = 0; i < asset.length; i++) {
+    //   if (asset[i] > 100000) {
+    //     assetDict["10B"] += 1
+    //   }
+    //   // else if (asset[i] > 10000) {
+    //   //   assetDict["10000.0"] += 1
+    //   // } 
+    //   else if (asset[i] > 5000) {
+    //     assetDict["5B"] += 1
+    //   } 
+    //   else if (asset[i] > 1000) {
+    //     assetDict["1B"] += 1
+    //   } else if (asset[i] > 668.3) {
+    //     assetDict["668M"] += 1
+    //   } else if (asset[i] > 336.6) {
+    //     assetDict["336M"] += 1
+    //   } else if (asset[i] > 4.9) {
+    //     assetDict["4.9M"] += 1
+    //   }
+    // }
+
     const rangeStart = 4.9;
     const rangeEnd = 1000;
     const batchSize = (rangeEnd - rangeStart) / 3;
@@ -391,28 +432,31 @@
     }
 
     // 3. make the dictionary of counts for the price: tick: 6
-    assetDict["4.9M"] = 0, assetDict["336M"] = 0, assetDict["668M"] = 0;
-    assetDict["1B"] = 0;
-    // assetDict["10000.0"] = 0;
-    assetDict["10B"] = 0;
+    assetDict["20"] = 0, assetDict["80"] = 0, assetDict["310"] = 0;
+    assetDict["1.3K"] = 0, assetDict["4.9K"] = 0, assetDict["20K"] = 0;
+    assetDict["77K"] = 0, assetDict["310K"] = 0
 
     for (let i = 0; i < asset.length; i++) {
-      if (asset[i] > 100000) {
-        assetDict["10B"] += 1
+      if (asset[i] > 77000) {
+        assetDict["310K"] += 1
       }
-      // else if (asset[i] > 10000) {
-      //   assetDict["10000.0"] += 1
-      // } 
-      else if (asset[i] > 1000) {
-        assetDict["1B"] += 1
-      } else if (asset[i] > 668.3) {
-        assetDict["668M"] += 1
-      } else if (asset[i] > 336.6) {
-        assetDict["336M"] += 1
-      } else if (asset[i] > 4.9) {
-        assetDict["4.9M"] += 1
-      }
+      else if (asset[i] > 20000) {
+        assetDict["77K"] += 1
+      } 
+      else if (asset[i] > 49000) {
+        assetDict["20K"] += 1
+      } else if (asset[i] > 13000) {
+        assetDict["4.9K"] += 1
+      } else if (asset[i] > 310) {
+        assetDict["1.3K"] += 1
+      } else if (asset[i] > 80) {
+        assetDict["310"] += 1
+      } else if (asset[i] > 20) {
+        assetDict["80"] += 1
+      }else if (asset[i] > 4.9) {
+        assetDict["20"] += 1
     }
+  }
 
     console.log(assetDict);
 
@@ -434,6 +478,10 @@
       .domain([0, d3.max(Object.values(assetDict))])
       .range([300 - margin2.top - margin2.bottom, 0]); //height, 0
 
+    // color scale for bars 
+    const colors = ['#FBFCD4', '#EAF5B6', '#CAE4A1', '#A0CE8B', '#74B573', '#509457', '#367343', '#235533' ];
+    const colorScale = d3.scaleOrdinal().domain(Object.keys(assetDict)).range(colors);
+
     // Create the bars
     svg2.selectAll('rect')
       .data(Object.entries(assetDict))
@@ -442,19 +490,19 @@
       .attr('x', (d) => xScale(d[0]))
       .attr('y', (d) => margin2.top + yScale(d[1]))
       .attr('width', xScale.bandwidth())
-      .attr('height', (d) => 300 - margin2.top - margin2.bottom - yScale(d[1]))
-      .attr('fill', 'steelblue');
+      .attr('height', (d) => 305 - margin2.top - margin2.bottom - yScale(d[1]))
+      .attr('fill', (d) => colorScale(d[0]));
 
     // x and y axis labels and titles
     svg2.append('g')
-      .attr('transform', 'translate(0, 270)')
+      .attr('transform', 'translate(0, 275)')
       .call(d3.axisBottom(xScale)
         .tickFormat(function (d) {
           return "$" + d;
         }));
 
     svg2.append('g')
-      .attr("transform", `translate(${margin2.left}, ${margin2.top})`)
+      .attr("transform", `translate(${margin2.left}, ${margin2.top + 5})`)
       .call(d3.axisLeft(yScale));
 
     //axis label
