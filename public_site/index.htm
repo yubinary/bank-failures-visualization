@@ -24,7 +24,7 @@
     </div>
     <div class="right">
       <svg id="legend" width="500" height="50"></svg>
-      <svg id="priceSvg" width=400 height=350></svg>
+      <svg id="priceSvg" width=500 height=350></svg>
       <svg id="map" width="500" height="350"></svg>
     </div>
   </div>
@@ -554,7 +554,7 @@
     //  Define the scales for the x and y axes
     let xScale = d3.scaleBand()
       .domain(Object.keys(assetDict))
-      .range([margin2.left, 400]) //0, width
+      .range([margin2.left, 500]) //0, width
       .padding(0.2);
 
     let yScale = d3.scaleLinear()
@@ -602,7 +602,7 @@
     //   .text("Number of Banks by Asset (Millions)");
 
     svg2.append('text')
-      .attr("transform", "translate(" + (200) + " ," + (320) + ")") //320=y 
+      .attr("transform", "translate(" + (280) + " ," + (320) + ")") //320=y 
       // .attr('x', width2 / 2 + 10)
       // .attr('y', height2 - 10)
       .attr('text-anchor', 'middle')
