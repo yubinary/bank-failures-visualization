@@ -42,7 +42,7 @@
     const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
     const dataFilter0 = await d3.json("datasets/total.json", d3.autoType);
 
-    let i=0;
+    let i = 0;
     let alldict = {};
     dataFilter0.forEach(d => {
       d["unique_id"] = "x" + i;
@@ -152,7 +152,7 @@
         .attr("fill", "#fff")
         .attr("stroke", "#000")
         .attr("stroke-width", 1);
-        
+
 
       viewport2.selectAll('circle')
         .data(newdata9)
@@ -163,8 +163,8 @@
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .attr('r', 6)
-        .attr('stroke', "black")
-        .attr('opacity', 0.7)
+        .attr('stroke', "white")
+        .attr('opacity', 0.8)
         .attr("fill", d => colorScale(d['Asset']));
     }
     map_render();
@@ -232,15 +232,15 @@
                 viewport2.select("circle#" + this.id)
                   .attr("fill", "red")
                   .attr("opacity", 1)
-                  .attr("r", 7)
+                  .attr("r", 10)
                   .raise();
 
                 if (clicked == this) {
                   viewport2.select("circle#" + this.id)
-                  .attr("fill", d => colorScale(d['Asset']))
-                  .attr("opacity", 0.7)
-                  .attr("r", 5)
-                  .raise();
+                    .attr("fill", d => colorScale(d['Asset']))
+                    .attr("opacity", 0.7)
+                    .attr("r", 5)
+                    .raise();
 
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']))
