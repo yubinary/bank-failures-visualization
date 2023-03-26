@@ -45,8 +45,8 @@
     let i=0;
     let alldict = {};
     dataFilter0.forEach(d => {
-      d["unique_id"] = "h" + i;
-      alldict[d.Bank + d.City] = "h" + i;
+      d["unique_id"] = "x" + i;
+      alldict[d.Bank + d.Asset] = "x" + i;
       i++
     })
 
@@ -60,7 +60,7 @@
       d["Bank"] = arr[0];
       d["City"] = arr[1];
       d["State"] = arr[2];
-      d["unique_id"] = alldict[d.Bank + d.City];
+      d["unique_id"] = alldict[d.Bank + d.Asset];
     });
 
     // sort data by descending Asset
@@ -127,7 +127,6 @@
 
       let cities = await d3.csv("./uscities.csv");
 
-      let test = 0;
       let accum = 0;
       let newdata9 = [];
 
@@ -136,7 +135,6 @@
         cities.forEach((k) => {
           if (d.City == k.city) {
             if (d.State == k.state_id || d.State == k.state_name) {
-              test++;
               d.Position = projection([k.lng, k.lat]);
               accum++;
             }
@@ -154,12 +152,14 @@
         .attr("fill", "#fff")
         .attr("stroke", "#000")
         .attr("stroke-width", 1);
+        
 
       viewport2.selectAll('circle')
         .data(newdata9)
         .enter()
         .append('circle')
         .attr("id", d => d.unique_id)
+        .attr("class", d => d.Bank)
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .attr('r', 6)
