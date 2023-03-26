@@ -3,6 +3,7 @@
 <head>
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="drawLegend.js"></script>
 </head>
@@ -22,13 +23,15 @@
       <svg id="network" width="800" height="1000"></svg>
     </div>
     <div class="right">
-      <svg id="priceSvg" width=400 height=350></svg>
       <svg id="legend" width="500" height="50"></svg>
+      <svg id="priceSvg" width=400 height=350></svg>
+      <svg id="map" width="500" height="350"></svg>
     </div>
   </div>
 </body>
 
 <script>
+
   const svg = d3.select("svg#network");
   const height = svg.attr("height");
   const width = svg.attr("width");
@@ -38,6 +41,14 @@
   const requestData = async () => {
     const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
     const dataFilter0 = await d3.json("datasets/total.json", d3.autoType);
+
+    let i=0;
+    let alldict = {};
+    dataFilter0.forEach(d => {
+      d["unique_id"] = "h" + i;
+      alldict[d.Bank + d.City] = "h" + i;
+      i++
+    })
 
     data.forEach(d => {
       // convert a currency string to a double 
@@ -49,6 +60,7 @@
       d["Bank"] = arr[0];
       d["City"] = arr[1];
       d["State"] = arr[2];
+      d["unique_id"] = alldict[d.Bank + d.City];
     });
 
     // sort data by descending Asset
@@ -99,6 +111,64 @@
       });
     }
 
+    //Start of the US Map code
+    const newsvg = d3.select("svg#map");
+    const viewport2 = newsvg.append("g");
+
+    const mainWidth = newsvg.attr("width");
+    const mainHeight = newsvg.attr("height");
+
+    let map_render = async function () {
+      let us = await d3.json("./us-map2.json");
+
+      let projection = d3.geoAlbersUsa().fitSize([mainWidth, mainHeight], us);
+
+      let path = d3.geoPath().projection(projection);
+
+      let cities = await d3.csv("./uscities.csv");
+
+      let test = 0;
+      let accum = 0;
+      let newdata9 = [];
+
+      data.forEach((d) => {
+        accum = 0;
+        cities.forEach((k) => {
+          if (d.City == k.city) {
+            if (d.State == k.state_id || d.State == k.state_name) {
+              test++;
+              d.Position = projection([k.lng, k.lat]);
+              accum++;
+            }
+          }
+        });
+        if (d.Position) {
+          newdata9.push(d);
+        }
+      })
+
+      viewport2.selectAll("path")
+        .data(us.features)
+        .join("path")
+        .attr("d", path)
+        .attr("fill", "#fff")
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1);
+
+      viewport2.selectAll('circle')
+        .data(newdata9)
+        .enter()
+        .append('circle')
+        .attr("id", d => d.unique_id)
+        .attr('cx', d => d.Position[0])
+        .attr('cy', d => d.Position[1])
+        .attr('r', 6)
+        .attr('stroke', "black")
+        .attr('opacity', 0.7)
+        .attr("fill", d => colorScale(d['Asset']));
+    }
+    map_render();
+
     function drawNetworkDiagram(data) {
       let assetExtent = d3.extent(data, d => d['Asset']);
       let assetScale = d3.scaleSqrt().domain(assetExtent).range([3, 130]);
@@ -148,6 +218,7 @@
           .data(data)
           .join(
             enter => enter.append("circle")
+              .attr('id', d => d.unique_id)
               .attr("class", "node")
               .attr("r", d => assetScale(d['Asset']))
               .attr("cx", d => d.x)
@@ -157,8 +228,20 @@
                 let node = d3.select(this)
                 let selectedData = node.datum();
                 var selectedCircle = node.node().getBBox();
-                console.log(selectedCircle)
+
+                viewport2.select("circle#" + this.id)
+                  .attr("fill", "red")
+                  .attr("opacity", 1)
+                  .attr("r", 7)
+                  .raise();
+
                 if (clicked == this) {
+                  viewport2.select("circle#" + this.id)
+                  .attr("fill", d => colorScale(d['Asset']))
+                  .attr("opacity", 0.7)
+                  .attr("r", 5)
+                  .raise();
+
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']))
                     .style("stroke", "none");
