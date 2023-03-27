@@ -35,7 +35,7 @@
     </div>
     <div class="right">
       <svg id="legend" width="500" height="50"></svg>
-      <svg id="priceSvg" width=400 height=350></svg>
+      <svg id="priceSvg" width=500 height=350></svg>
       <svg id="map" width="500" height="350"></svg>
     </div>
   </div>
@@ -174,8 +174,8 @@
         .attr('cx', d => d.Position[0])
         .attr('cy', d => d.Position[1])
         .attr('r', 6)
-        .attr('stroke', "black")
-        .attr('opacity', 0.7)
+        .attr('stroke', "white")
+        .attr('opacity', 0.8)
         .attr("fill", d => colorScale(d['Asset']));
     }
     map_render();
@@ -263,7 +263,7 @@
                 viewport2.select("circle#" + this.id)
                   .attr("fill", "red")
                   .attr("opacity", 1)
-                  .attr("r", 7)
+                  .attr("r", 10)
                   .raise();
 
                 if (clicked == this) {
@@ -586,7 +586,7 @@
     //  Define the scales for the x and y axes
     let xScale = d3.scaleBand()
       .domain(Object.keys(assetDict))
-      .range([margin2.left, 400]) //0, width
+      .range([margin2.left, 500]) //0, width
       .padding(0.2);
 
     let yScale = d3.scaleLinear()
@@ -636,7 +636,7 @@
     //   .text("Number of Banks by Asset (Millions)");
 
     svg2.append('text')
-      .attr("transform", "translate(" + (200) + " ," + (320) + ")") //320=y 
+      .attr("transform", "translate(" + (280) + " ," + (320) + ")") //320=y 
       // .attr('x', width2 / 2 + 10)
       // .attr('y', height2 - 10)
       .attr('text-anchor', 'middle')
