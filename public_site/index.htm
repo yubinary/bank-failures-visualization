@@ -15,8 +15,7 @@
     .node {
       cursor: pointer;
     }
-    
-</style>
+  </style>
 </head>
 
 <body>
@@ -35,6 +34,7 @@
     </div>
     <div class="right">
       <svg id="legend" width="500" height="50"></svg>
+      <p>&#11015; Click the bar to filter the circles</p>
       <svg id="priceSvg" width=500 height=350></svg>
       <svg id="map" width="500" height="350"></svg>
     </div>
@@ -668,40 +668,40 @@
 
     svg2.selectAll('rect')
       .on('click', function (d) {
-          chartArea.selectAll(".k20").style("opacity", 1);
-          chartArea.selectAll(".k80").style("opacity", 1);
-          chartArea.selectAll(".k310").style("opacity", 1);
-          chartArea.selectAll(".k13k").style("opacity", 1);
-          chartArea.selectAll(".k49k").style("opacity", 1);
-          chartArea.selectAll(".k20k").style("opacity", 1);
-          chartArea.selectAll(".k77k").style("opacity", 1);
-          chartArea.selectAll(".k310k").style("opacity", 1);
+        chartArea.selectAll(".k20").style("opacity", 1);
+        chartArea.selectAll(".k80").style("opacity", 1);
+        chartArea.selectAll(".k310").style("opacity", 1);
+        chartArea.selectAll(".k13k").style("opacity", 1);
+        chartArea.selectAll(".k49k").style("opacity", 1);
+        chartArea.selectAll(".k20k").style("opacity", 1);
+        chartArea.selectAll(".k77k").style("opacity", 1);
+        chartArea.selectAll(".k310k").style("opacity", 1);
 
         let clickedBar = d3.select(this);
         clickedData = clickedBar._groups[0][0].__data__[0];
 
-        if (clickedData != "20"){
+        if (clickedData != "20") {
           chartArea.selectAll(".k20").style("opacity", 0);
         }
-        if (clickedData != "80"){
+        if (clickedData != "80") {
           chartArea.selectAll(".k80").style("opacity", 0);
         }
-        if (clickedData != "310"){
+        if (clickedData != "310") {
           chartArea.selectAll(".k310").style("opacity", 0);
         }
-        if (clickedData != "1.3K"){
+        if (clickedData != "1.3K") {
           chartArea.selectAll(".k13k").style("opacity", 0);
         }
-        if (clickedData != "4.9K"){
+        if (clickedData != "4.9K") {
           chartArea.selectAll(".k49k").style("opacity", 0);
         }
-        if (clickedData != "20K"){
+        if (clickedData != "20K") {
           chartArea.selectAll(".k20k").style("opacity", 0);
         }
-        if (clickedData != "77K"){
+        if (clickedData != "77K") {
           chartArea.selectAll(".k77k").style("opacity", 0);
         }
-        if (clickedData != "310K"){
+        if (clickedData != "310K") {
           chartArea.selectAll(".k310k").style("opacity", 0);
         }
       });
@@ -711,13 +711,13 @@
     svg2.selectAll("rect").on("mouseover", function (event, d) {
       onRect = true;
     });
-    
+
     svg2.selectAll("rect").on("mouseout", function (event, d) {
       onRect = false;
     });
 
     svg2.on('click', function (d) {
-      if (!onRect){
+      if (!onRect) {
         chartArea.selectAll(".k20").style("opacity", 1);
         chartArea.selectAll(".k80").style("opacity", 1);
         chartArea.selectAll(".k310").style("opacity", 1);
