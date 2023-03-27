@@ -6,6 +6,17 @@
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="drawLegend.js"></script>
+
+  <style>
+    .pointerRec {
+      cursor: pointer;
+    }
+
+    .node {
+      cursor: pointer;
+    }
+    
+</style>
 </head>
 
 <body>
@@ -42,7 +53,7 @@
     const data = await d3.csv("datasets/bfb-data.csv", d3.autoType);
     const dataFilter0 = await d3.json("datasets/total.json", d3.autoType);
 
-    let i=0;
+    let i = 0;
     let alldict = {};
     dataFilter0.forEach(d => {
       d["unique_id"] = "x" + i;
@@ -152,7 +163,7 @@
         .attr("fill", "#fff")
         .attr("stroke", "#000")
         .attr("stroke-width", 1);
-        
+
 
       viewport2.selectAll('circle')
         .data(newdata9)
@@ -219,7 +230,27 @@
           .join(
             enter => enter.append("circle")
               .attr('id', d => d.unique_id)
-              .attr("class", "node")
+              .attr("class", d => {
+                if (d.Asset >= 77000) {
+                  return "node k310k";
+                }
+                else if (d.Asset > 20000) {
+                  return "node k77k";
+                }
+                else if (d.Asset > 4900) {
+                  return "node k20k";
+                } else if (d.Asset > 1300) {
+                  return "node k49k";
+                } else if (d.Asset > 310) {
+                  return "node k13k";
+                } else if (d.Asset > 80) {
+                  return "node k310";
+                } else if (d.Asset > 20) {
+                  return "node k80";
+                } else if (d.Asset >= 4.9) {
+                  return "node k20";
+                }
+              })
               .attr("r", d => assetScale(d['Asset']))
               .attr("cx", d => d.x)
               .attr("cy", d => d.y)
@@ -237,10 +268,10 @@
 
                 if (clicked == this) {
                   viewport2.select("circle#" + this.id)
-                  .attr("fill", d => colorScale(d['Asset']))
-                  .attr("opacity", 0.7)
-                  .attr("r", 5)
-                  .raise();
+                    .attr("fill", d => colorScale(d['Asset']))
+                    .attr("opacity", 0.7)
+                    .attr("r", 5)
+                    .raise();
 
                   node.transition().duration(650).attr("fill", d => colorScale(d['Asset']))
                     .attr("r", d => assetScale(d['Asset']))
@@ -275,6 +306,7 @@
                   clicked = null;
                   d3.selectAll(".info").remove();
                 } else {
+
                   let pastNode;
                   if (clicked == null) {
                     pastNode = d3.select(this)
@@ -570,6 +602,8 @@
       .data(Object.entries(assetDict))
       .enter()
       .append('rect')
+      .attr("id", (d) => d[0])
+      .attr("class", "pointerRec")
       .attr('x', (d) => xScale(d[0]))
       .attr('y', (d) => margin2.top + yScale(d[1]))
       .attr('width', xScale.bandwidth())
@@ -632,26 +666,68 @@
       .style('visibility', 'visible');
 
 
-    // svg2.selectAll('rect')
-    //   .on('mouseover', function (d) {
-    //     // Show label
-    //     d3.select(this)
-    //       .style('opacity', 0.7);
-    //     console.log(d, this)
-    //   })
-    //   .on('mouseout', function () {
-    //     // Hide label
-    //     d3.select(this)
-    //       .style('opacity', 1);
+    svg2.selectAll('rect')
+      .on('click', function (d) {
+          chartArea.selectAll(".k20").style("opacity", 1);
+          chartArea.selectAll(".k80").style("opacity", 1);
+          chartArea.selectAll(".k310").style("opacity", 1);
+          chartArea.selectAll(".k13k").style("opacity", 1);
+          chartArea.selectAll(".k49k").style("opacity", 1);
+          chartArea.selectAll(".k20k").style("opacity", 1);
+          chartArea.selectAll(".k77k").style("opacity", 1);
+          chartArea.selectAll(".k310k").style("opacity", 1);
 
-    //     // labels.style('visibility', 'hidden');
-    //   });
+        let clickedBar = d3.select(this);
+        clickedData = clickedBar._groups[0][0].__data__[0];
 
-    // Button to export JSON file
-    // d3.select("#button").on("click", function (event, d) {
-    //   console.log(JSON.stringify(dataFilter0));
-    // });
+        if (clickedData != "20"){
+          chartArea.selectAll(".k20").style("opacity", 0);
+        }
+        if (clickedData != "80"){
+          chartArea.selectAll(".k80").style("opacity", 0);
+        }
+        if (clickedData != "310"){
+          chartArea.selectAll(".k310").style("opacity", 0);
+        }
+        if (clickedData != "1.3K"){
+          chartArea.selectAll(".k13k").style("opacity", 0);
+        }
+        if (clickedData != "4.9K"){
+          chartArea.selectAll(".k49k").style("opacity", 0);
+        }
+        if (clickedData != "20K"){
+          chartArea.selectAll(".k20k").style("opacity", 0);
+        }
+        if (clickedData != "77K"){
+          chartArea.selectAll(".k77k").style("opacity", 0);
+        }
+        if (clickedData != "310K"){
+          chartArea.selectAll(".k310k").style("opacity", 0);
+        }
+      });
 
+    let onRect = false;
+
+    svg2.selectAll("rect").on("mouseover", function (event, d) {
+      onRect = true;
+    });
+    
+    svg2.selectAll("rect").on("mouseout", function (event, d) {
+      onRect = false;
+    });
+
+    svg2.on('click', function (d) {
+      if (!onRect){
+        chartArea.selectAll(".k20").style("opacity", 1);
+        chartArea.selectAll(".k80").style("opacity", 1);
+        chartArea.selectAll(".k310").style("opacity", 1);
+        chartArea.selectAll(".k13k").style("opacity", 1);
+        chartArea.selectAll(".k49k").style("opacity", 1);
+        chartArea.selectAll(".k20k").style("opacity", 1);
+        chartArea.selectAll(".k77k").style("opacity", 1);
+        chartArea.selectAll(".k310k").style("opacity", 1);
+      }
+    });
   }
   requestData();
 
